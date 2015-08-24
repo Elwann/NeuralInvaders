@@ -1,5 +1,6 @@
-var canvas, affichage, scoreDisplay, menu, music, intro, accelerateGeneration, context, player, invasion, earth, gameObjects = [], colliders = [];
+var state, canvas, affichage, scoreDisplay, menu, music, intro, accelerateGeneration, context, player, invasion, earth, gameObjects = [], colliders = [];
 
+// KeyCodes shortcuts
 var Key = {
 	SPACE: 32,
 	UP: 38,
@@ -9,6 +10,7 @@ var Key = {
 	S: 83
 };
 
+// Input class for getting key pressed or mouse position
 var Input = {
 	mouse: {
 		x: 0,
@@ -34,17 +36,26 @@ var Input = {
 	}
 };
 
-window.onkeydown = function(e){
+window.onkeydown = function(e)
+{
 	if(!Input.keyDown(e.keyCode)) Input.keys.down.push(e.keyCode);
 	if(!Input.keyPress(e.keyCode)) Input.keys.press.push(e.keyCode);
 };
 
-window.onkeyup = function(e){
+window.onkeyup = function(e)
+{
 	Input.keys.up.push(e.keyCode);
 	var index = Input.keys.press.indexOf(e.keyCode);
 	if(index >= 0) Input.keys.press.splice(index, 1);
 };
 
+window.onmousemove = function(e)
+{
+	Input.mouse.x = e.pageX;
+	Input.mouse.y = e.pageY;
+};
+
+// Track time passed, or scale it
 var Time = {
 	last: performance.now(),
 	trueDeltaTime: 0,
@@ -52,6 +63,7 @@ var Time = {
 	timeScale: 1,
 };
 
+// Gestion for camera position, shake, zoom
 var Camera = {
 	rotation: 0,
 	position: new Vector(0, 0),
@@ -70,6 +82,15 @@ var Camera = {
 			});
 		}
 	},
+	animateZoom: function(destination, speed)
+	{
+		Camera.zoom = Camera.zoom + Time.trueDeltaTime * speed * (destination - Camera.zoom);
+		if(Math.round(Camera.zoom * 50) / 50 == destination){
+			Camera.zoom = destination;
+		} else {
+			window.requestAnimationFrame(function(){ Camera.animateZoom(destination, speed); });
+		}
+	},
 	draw: function(){
 		context.translate((Camera.position.x + Camera.shake.y + canvas.width/2), (Camera.position.y + Camera.shake.y + canvas.height/2));
 		context.rotate(Camera.rotation + Math.PI / 2);
@@ -77,19 +98,12 @@ var Camera = {
 	}
 };
 
+// Game states shortcuts
 var States = {
 	INIT: 0,
 	MENU: 1,
 	PLAY: 2,
 	GAMEOVER: 3
-};
-
-var state = States.INIT;
-
-window.onmousemove = function(e)
-{
-	Input.mouse.x = e.pageX;
-	Input.mouse.y = e.pageY;
 };
 
 // Create a gameObject
@@ -145,6 +159,7 @@ function RemoveCollider(object){
 	return true;
 }
 
+// Track time for the current frame
 function deltaTime()
 {
 	var time = performance.now();
@@ -153,6 +168,7 @@ function deltaTime()
 	Time.last = time;
 }
 
+// Clear the canvas and draw background
 function clear()
 {
 	context.clearRect(0, 0, canvas.width*0.26, canvas.height);
@@ -160,32 +176,39 @@ function clear()
 	context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+// Update game mecanics
 function update()
 {
+	// Sould we accelerate the game
 	var frame = 1;
-
-	if(Input.keyDown(Key.S))
-		accelerateGeneration = !accelerateGeneration;
-
 	if(accelerateGeneration)
 		frame = Params.generationAcceleration;
 	
 	for(var f = 0; f < frame; ++f){
+		// Loop through all gameObjects and update them
 		for(var i = gameObjects.length-1; i>=0; i--){
 			gameObjects[i].update();
 		}
 	}
 
+	// Change acceleration
+	if(Input.keyDown(Key.S))
+		accelerateGeneration = !accelerateGeneration;
+
+	// If not started && key space pressed, start the game
 	if(state == States.INIT && Input.keyDown(Key.SPACE))
 		start();
 }
 
+// Render every object
 function render()
 {
 	context.save();
-	
+
+	// Get camera matrix
 	Camera.draw();
 	
+	// Loop through all gameObjects and update them
 	for(var i = gameObjects.length-1; i>=0; i--){
 		gameObjects[i].draw();
 	}
@@ -193,6 +216,7 @@ function render()
 	context.restore();
 }
 
+// Game loop
 function loop()
 {
 	deltaTime();
@@ -204,79 +228,94 @@ function loop()
 	requestAnimationFrame(loop);
 }
 
-function animateZoom(destination, speed)
-{
-	Camera.zoom = Camera.zoom + Time.trueDeltaTime * speed * (destination - Camera.zoom);
-	if(Math.round(Camera.zoom * 100) / 100 == destination){
-		Camera.zoom = destination;
-	} else {
-		window.requestAnimationFrame(function(){ animateZoom(destination, speed); });
-	}
-}
-
+// Game initialisation
 function init()
 {
-	Camera.zoom = 1;
-
+	// Get and setup canvas
 	canvas = document.getElementById("canvas");
-
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
 
+	// Get and setup context
 	context = canvas.getContext("2d");
-
 	context.fillStyle = "#000000";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 
+	// Smaller zoom if mobile
+	if(canvas.width < 768)
+		Params.cameraZoom = Params.cameraZoom * 0.65;
+
+	// Set new zoom
+	Camera.zoom = Params.cameraZoom;
+
+	// Get html elements used for menus
 	affichage = document.getElementById("affichage");
 	scoreDisplay = document.getElementById("score");
 	menu = document.getElementById("menu");
 	
+	// Load ambiant sounds
 	music = new Audio("app/assets/sound/amb-ni-space-loop.mp3");
 	intro = new Audio("app/assets/sound/amb-ni-space-intro.mp3");
 
+	// Playe ambiant music loop
 	music.volume = 1;
 	music.loop = true;
 	music.play();
 
+	// Add some stars
 	Instantiate(new Stars(new Vector(), canvas.height, canvas.height / 10));
 
+	// Normal game speed
 	accelerateGeneration = false;
-
-	if(canvas.width < 768)
-		Params.cameraZoom = Params.cameraZoom * 0.65;
 	
+	// Set state to init
 	state = States.INIT;
 
 	loop();
 }
 
-function start(){
+// Start game
+function start()
+{
+	// remove menu
 	menu.innerHTML = "";
-	Camera.zoom = 0.1;
 
+	// Reset inputs (no missfire at startup)
+	Input.update();
+	Input.keys.press = [];
+
+	// Setup camera position and zoom
+	Camera.zoom = 0.1;
 	Camera.position.y = canvas.height / 4;
 
+	// Reset gameObjects
 	gameObjects = [];
 
+	// Create player and earth
 	player = Instantiate(new Player(new Vector(0, 0)));
 	earth = Instantiate(new Earth(new Vector(), 100));
 	
+	// Create invasion
 	invasion = Instantiate(new Invasion());
 
+	// Add Background stars
 	Instantiate(new Stars(new Vector(), canvas.width + canvas.height, (canvas.width + canvas.height) / 10));
 
-	animateZoom(Params.cameraZoom, 1.5);
+	// Animate camera and play intro sound
+	Camera.animateZoom(Params.cameraZoom, 1.5);
 	intro.play();
 	
+	// Set state to play
 	state = States.PLAY;
 }
 
+// Change canvas size and screen size
 window.onresize = function(){
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
 };
 
+// Play on mouse slick
 window.onclick = function(){
 	if(state == States.INIT)
 		start();

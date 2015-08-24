@@ -1,3 +1,4 @@
+// Shoot lazer
 function Lazer(position, direction, length, owner, color)
 {
 	this.position = position;
@@ -11,9 +12,11 @@ function Lazer(position, direction, length, owner, color)
 	this.ticks = 0;
 	this.lifeTime = 24;
 
+	// Check collision
 	this.fire();
 }
 
+// Destroy at end of life time
 Lazer.prototype.update = function()
 {
 	if(this.ticks >= this.lifeTime)
@@ -42,6 +45,7 @@ Lazer.prototype.draw = function()
 	}
 };
 
+// Check if a collider is hit
 Lazer.prototype.fire = function()
 {
 	for(var i = 0, length = colliders.length; i < length; ++i)
@@ -57,6 +61,7 @@ Lazer.prototype.fire = function()
 	}
 };
 
+// Function to check collision between ray and circle
 Lazer.prototype.ray = function(collider)
 {
 	// compute the triangle area times 2 (area = area2/2)

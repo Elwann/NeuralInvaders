@@ -1,3 +1,4 @@
+// Simple circle collider
 function CircleCollider(radius, owner)
 {
 	this.radius = radius;

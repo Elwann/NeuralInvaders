@@ -1,5 +1,4 @@
-//ctx.clip();
-
+// Earth function
 function Earth(position, radius){
 	this.position = position;
 	this.radius = radius;
@@ -10,21 +9,25 @@ function Earth(position, radius){
 }
 
 Earth.prototype.update = function() {
+	// Animate earth rotation
 	this.animation = (this.animation + this.speed) % this.landwidth;
 };
 
 Earth.prototype.draw = function() {
+	// Draw earth
 	context.save();
 
 	context.translate(this.position.x, this.position.y);
 	context.rotate(this.rotation / 180 * Math.PI);
 
+	// Black background
 	context.beginPath();
 	context.arc(0, 0, this.radius, 0, 2 * Math.PI, false);
 	context.fillStyle = '#000000';
 	context.fill();
 	context.closePath();
 
+	// Atmosphere
 	context.beginPath();
 	context.arc(0, 0, this.radius * 1.06, 0, 2 * Math.PI, false);
 	context.strokeStyle = '#6E9FCA';
@@ -32,12 +35,14 @@ Earth.prototype.draw = function() {
 	context.stroke();
 	context.closePath();
 
+	// Sea rim
 	context.beginPath();
 	context.arc(0, 0, this.radius * 0.99, 0, 2 * Math.PI, false);
 	context.strokeStyle = '#6E9FCA';
 	context.stroke();
 	context.closePath();
 
+	// Sea color
 	context.beginPath();
 	context.arc(0, 0, this.radius * 0.98, 0, 2 * Math.PI, false);
 	context.strokeStyle = '#164163';
@@ -45,6 +50,7 @@ Earth.prototype.draw = function() {
 	context.stroke();
 	context.closePath();
 
+	// Player orbit
 	context.save();
 	context.beginPath();
 	context.arc(0, 0, this.radius + 35, 0, 2 * Math.PI, false);
@@ -55,11 +61,13 @@ Earth.prototype.draw = function() {
 	context.closePath();
 	context.restore();
 
+	// Land clip
 	context.beginPath();
 	context.arc(0, 0, this.radius, 0, 2 * Math.PI, false);
 
 	context.clip();
 
+	// Draw 2 times earth continents for animation
 	this.land(this.animation, 0);
 	this.land(this.animation + this.landwidth, 0);
 
@@ -68,6 +76,7 @@ Earth.prototype.draw = function() {
 	context.restore();
 };
 
+// Continents points
 Earth.prototype.land = function(x, y){
 	context.save();
 	context.rotate(Math.PI / 3);

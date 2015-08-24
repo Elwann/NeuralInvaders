@@ -3,9 +3,10 @@ function Invader()
 	//the Invader's neural net
 	this.brain = new NeuralNet();
 
-	this.position = 0;
-	this.rotation = 0;
-	this.lookAt = 0; //direction sweeper is facing
+	this.position;
+	this.rotation;
+	//direction sweeper is facing
+	this.lookAt; 
 
 	this.speed = 0;
 	this.maxSpeed = Params.maxSpeed;
@@ -26,18 +27,13 @@ function Invader()
 	this.scale = Params.sweeperScale;
 
 	this.dead;
+	this.spawned;
 
 	this.lifeTime;
-	//this.outTime = 0;
 	this.fireTime;
 	this.fireRate = 60;
 
 	this.cibleDistance = 999999;
-
-	this.spawned = false;
-
-	//this.sound = new Audio("app/assets/sound/sfx-ni-enemis-loop.mp3");
-	//this.volume = 0.2;
 
 	this.reset();
 }
@@ -46,15 +42,12 @@ function Invader()
 Invader.prototype.reset = function()
 {
 	//reset the sweepers positions
-	//this.position = new Vector(earth.position.x + (Math.random() * 2 - 1) * Params.maxInvasionRadius, earth.position.y + (Math.random() * 2 - 1) * Params.maxInvasionRadius);
 	this.position = randomDonut(earth.position, Params.minInvasionRadius, Params.maxInvasionRadius);
-	this.lookAt = new Vector();
+	this.rotation = Math.random() * Math.PI * 2;
+	this.lookAt = new Vector(this.rotation);
 
 	//and the fitness
 	this.fitness = 0;
-
-	//and the rotation
-	this.rotation = Math.random() * Math.PI * 2;
 
 	this.lifeTime = 0;
 	this.outTime = 0;
@@ -64,23 +57,15 @@ Invader.prototype.reset = function()
 	this.spawned = false;
 	this.dead = false;
 
-	//this.sound.volume = 0;
-	//this.sound.loop = true;
-	//this.sound.play();
-
 	return;
 };
-
-// sets up a translation matrix for the sweeper according to its
-// scale, rotation and position. Returns the transformed vertices.
-// void CInvader::WorldTransform(vector<SPoint> &sweeper)
 
 // First we take sensor readings and feed these into the sweepers brain.
 //
 // The inputs are:
-// 
-// A vector to the closest mine (x, y)
+// A vector to the earth (x, y)
 // The sweepers 'look at' vector (x, y)
+// A vector to represent player aim direction (x, y)
 //
 // We receive two outputs from the brain.. lTrack & rTrack.
 // So given a force for each track we calculate the resultant rotation 
@@ -88,66 +73,68 @@ Invader.prototype.reset = function()
 
 Invader.prototype.update = function()
 {
+	// Don't update if not spawned or dead
+	if(this.dead || !this.spawned) return;
+
 	this.lifeTime++;
 	
-	//this will store all the inputs for the NN
+	// this will store all the inputs for the NN
 	var inputs = [];
 
-	//add direction of the earth
+	// add direction of the earth
 	var destination = new Vector(earth.position.x - this.position.x, earth.position.y - this.position.y).normalize();
 	inputs.push(destination.x);
 	inputs.push(destination.y);
 
-	//add look at vector
+	// add look at vector
 	inputs.push(this.lookAt.x);
 	inputs.push(this.lookAt.y);
 
-	//add player aim
+	// add player aim
 	var aim = new Vector(player.position.x - earth.position.x, player.position.y - earth.position.y).normalize();
 	inputs.push(aim.x);
 	inputs.push(aim.y);
 
-	//update the brain and get feedback
+	// update the brain and get feedback
 	var output = this.brain.update(inputs);
 
-	//make sure there were no errors in calculating the 
-	//output
+	// make sure there were no errors in calculating the output
 	if (output.length < Params.numOutputs)
 	{
 		return false;
 	}
 
-	//assign the outputs to the sweepers left & right tracks
+	// assign the outputs to the sweepers left & right tracks
 	this.lTrack = output[0];
 	this.rTrack = output[1];
-	//rotForce = (output[0] * 2 - 1);
-	//this.speed = output[1] * 2 - 1 //Math.clamp(output[1] * 2 - 1, 0, 1);
 
-	//calculate steering forces
+	// calculate steering forces
 	var rotForce = this.lTrack - this.rTrack;
 
-	//clamp rotation
+	// clamp rotation
 	rotForce = Math.clamp(rotForce, -Params.maxTurnRate, Params.maxTurnRate);
 
 	this.rotation += rotForce;
 	
 	this.speed = (this.lTrack + this.rTrack);
 
-	//update Look At 
+	// update Look At 
 	this.lookAt.lookAt(this.rotation);
 
-	//update position
+	// update position
 	this.position.x += this.lookAt.x * this.speed * this.maxSpeed; // * Time.deltaTime;
 	this.position.y += this.lookAt.y * this.speed * this.maxSpeed; // * Time.deltaTime;
 
+	// Kill if his life time is over
 	if(this.lifeTime > Params.lifeTime)
-	{
 		this.kill(true);
-	}
 
+	// Get distance to earth
 	this.cibleDistance = this.position.distance(earth.position);
 
+	// If crashed on eath
 	if(this.cibleDistance < earth.radius){
+		//kill himself and hit player
 		this.fitness += Params.scoreCrash;
 		player.hit();
 		this.kill();
@@ -156,7 +143,9 @@ Invader.prototype.update = function()
 	return true;
 };
 
-Invader.prototype.draw = function() {
+Invader.prototype.draw = function()
+{
+	// Don't draw if not spawned or dead
 	if(this.dead || !this.spawned) return;
 
 	context.save();
@@ -210,18 +199,22 @@ Invader.prototype.draw = function() {
 	context.restore();
 };
 
+// Increment fitness
 Invader.prototype.incrementFitness = function() {
 	this.fitness++;
 };
 
+// Change brain configuration
 Invader.prototype.putWeights = function(w) {
 	this.brain.putWeights(w);
 };
 
+// Get brain configuration
 Invader.prototype.getNumberOfWeights = function(w) {
 	this.brain.getNumberOfWeights(w);
 };
 
+// Kill player
 Invader.prototype.kill = function(fit) {
 	if(this.dead && !this.spawned) return;
 

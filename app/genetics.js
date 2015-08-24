@@ -2,16 +2,6 @@ function Genome(weights, fitness)
 {
 	this.vecWeights = weights || [];
 	this.fitness = fitness || 0;
-
-	//overload '<' used for sorting
-	/*
-
-	// TODO SORTING
-	friend bool operator<(const SGenome& lhs, const SGenome& rhs)
-	{
-		return (lhs.fitness < rhs.fitness);
-	}
-	*/
 }
 
 // sets up the population with random floats
@@ -44,7 +34,7 @@ function Genetics(popsize, mutRat, crossRat, numweights)
 }
 
 // mutates a chromosome by perturbing its weights by an amount not 
-// greater than CParams::dMaxPerturbation
+// greater than Params.maxPerturbation
 Genetics.prototype.mutate = function(chromo)
 {
 	//traverse the chromosome and mutate each weight dependent
@@ -134,8 +124,7 @@ Genetics.prototype.crossover = function(mum, dad, baby1, baby2)
 	return;
 };
 
-// takes a population of chromosones and runs the algorithm through one
-// cycle.
+// takes a population of chromosones and runs the algorithm through one cycle.
 // Returns a new population of chromosones.
 Genetics.prototype.epoch = function(oldPop)
 {
@@ -146,7 +135,6 @@ Genetics.prototype.epoch = function(oldPop)
 	this.reset();
 
 	//sort the population (for scaling and elitism)
-	//TODO: sort(this.vecPop.begin(), this.vecPop.end());
 	this.vecPop.sort(function(a, b){ return a.fitness - b.fitness; });
 
 	//calculate best, worst, average and total fitness
