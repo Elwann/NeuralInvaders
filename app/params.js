@@ -34,7 +34,7 @@ var Params = {
 
   // Scoring
   scoreCrash: 10,
-  scoreTime: 0.01,
+  scoreTime: 0.001,
   scoreDistance: 0.1,
 
   // Player
