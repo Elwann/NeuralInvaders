@@ -1,0 +1,42 @@
+body, html{
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+#affichage{
+	position: absolute;
+	bottom: 15px;
+	left: 15px;
+	right: 15px;
+	color: #fff;
+	text-align: center;
+	font-size: 12px;
+}
+
+#score{
+	position: absolute;
+	top: 15px;
+	left: 15px;
+	right: 15px;
+	color: #fff;
+	text-align: center;
+}
+
+#menu{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 300px;
+	height: 300px;
+	margin-left: -150px;
+	margin-top: -150px;
+	text-align: center;
+	color: #fff;
+}
+
+#menu h1{
+	font-weight: normal;
+	font-size: 48px;
+}
