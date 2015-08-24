@@ -127,7 +127,10 @@ Invader.prototype.update = function()
 
 	// Kill if his life time is over
 	if(this.lifeTime > Params.lifeTime)
-		this.kill(true);
+	{
+		this.fitness -= 10;
+		this.kill();
+	}
 
 	// Get distance to earth
 	this.cibleDistance = this.position.distance(earth.position);
@@ -200,28 +203,36 @@ Invader.prototype.draw = function()
 };
 
 // Increment fitness
-Invader.prototype.incrementFitness = function() {
+Invader.prototype.incrementFitness = function()
+{
 	this.fitness++;
 };
 
 // Change brain configuration
-Invader.prototype.putWeights = function(w) {
+Invader.prototype.putWeights = function(w)
+{
 	this.brain.putWeights(w);
 };
 
 // Get brain configuration
-Invader.prototype.getNumberOfWeights = function(w) {
+Invader.prototype.getNumberOfWeights = function(w)
+{
 	this.brain.getNumberOfWeights(w);
 };
 
 // Kill player
-Invader.prototype.kill = function(fit) {
+Invader.prototype.kill = function()
+{
 	if(this.dead && !this.spawned) return;
 
-	this.fitness += this.cibleDistance * Params.scoreDistance;
+	// Add fitness based on life time
 	this.fitness += this.lifeTime * Params.scoreTime;
 
-	if(fit) this.fitness = 0;
+	// Add fitness based on the inverse of the distance from earth (avoid fleeing away ?)
+	this.fitness += (Params.maxInvasionRadius - this.cibleDistance) * Params.scoreDistance;
+
+	// Clamp fitness to avoid errors with the genetic algorithm
+	this.fitness = Math.clamp(this.fitness, 0, 100);
 
 	this.dead = true;
 };
