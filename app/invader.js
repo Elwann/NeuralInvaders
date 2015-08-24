@@ -11,7 +11,7 @@ function Invader()
 	this.maxSpeed = Params.maxSpeed;
 	this.size = Params.sweeperScale;
 
-	this.collider = new CircleCollider(this.size, this);
+	this.collider = new CircleCollider(this.size * 1.8, this);
 	AddCollider(this);
 
 	//to store output from the ANN
