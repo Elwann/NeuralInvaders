@@ -34,9 +34,8 @@ var Params = {
 
   // Scoring
   scoreCrash: 10,
-  scoreTime: 0.0001,
-  scoreDistance: 0.01,
-  outSideTimeKill: 5 * 60,
+  scoreTime: 0.01,
+  scoreDistance: 0.1,
 
   // Player
   playerFireRate: 30,
