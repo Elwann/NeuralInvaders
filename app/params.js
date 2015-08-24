@@ -16,7 +16,7 @@ var Params = {
   lifeTime: 600,
 
   // Invasion
-  sweeperScale: 30,
+  sweeperScale: 15,
   numSweepers: 15,
   generationLifeTime: 10,
   numFrame: 600,

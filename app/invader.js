@@ -169,9 +169,9 @@ Invader.prototype.draw = function() {
 	context.rotate(this.rotation + Math.PI / 2);
 
 	context.beginPath();
-	context.moveTo(0, 0 - this.size / 2);
-	context.lineTo(0 - this.size / 2, 0 + this.size / 2);
-	context.lineTo(0 + this.size / 2, 0 + this.size / 2);
+	context.moveTo(0, 0 - this.size);
+	context.lineTo(0 - this.size, 0 + this.size);
+	context.lineTo(0 + this.size, 0 + this.size);
 	context.closePath();
 
 	context.strokeStyle = this.color;

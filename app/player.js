@@ -10,7 +10,7 @@ function Player(position)
 	this.acceleration = Params.playerAcceleration;
 	this.fireRate = Params.playerFireRate;
 	this.ticks = Params.playerFireRate;
-	this.size = 30;
+	this.size = 15;
 	this.color = "#ffff00";
 
 	this.crash = new Audio("app/assets/sound/sfx-ni-player-hit.mp3");
@@ -103,9 +103,9 @@ Player.prototype.draw = function()
 	context.lineWidth = 1 / Camera.zoom;
 	
 	context.beginPath();
-	context.moveTo(0, 0 - this.size / 2);
-	context.lineTo(0 - this.size / 2, 0 + this.size / 2);
-	context.lineTo(0 + this.size / 2, 0 + this.size / 2);
+	context.moveTo(0, 0 - this.size);
+	context.lineTo(0 - this.size, 0 + this.size);
+	context.lineTo(0 + this.size, 0 + this.size);
 	context.closePath();
 	context.strokeStyle = this.color;
 	context.stroke();
