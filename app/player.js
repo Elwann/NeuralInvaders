@@ -27,6 +27,7 @@ function Player(position)
 
 	document.ontouchstart = function(e)
 	{
+		e.preventDefault();
 		that.touch = true;
 		that.pressstart.x = e.touches[0].clientX;
 		that.pressstart.y = e.touches[0].clientY;
@@ -36,12 +37,14 @@ function Player(position)
 
 	document.ontouchmove = function(e)
 	{
+		e.preventDefault();
 		that.presscurrent.x = e.touches[0].clientX;
 		that.presscurrent.y = e.touches[0].clientY;
 	};
 
 	document.ontouchend = function(e)
 	{
+		e.preventDefault();
 		if(that.pressstart.distance(that.presscurrent) < 10)
 			that.fire();
 
