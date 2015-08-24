@@ -6,5 +6,5 @@ function CircleCollider(radius, owner)
 
 CircleCollider.prototype.collide = function(position)
 {
-	return (this.owner.position.distance(position) < this.radius + 5);
+	return (this.owner.position.distance(position) < this.radius);
 }
